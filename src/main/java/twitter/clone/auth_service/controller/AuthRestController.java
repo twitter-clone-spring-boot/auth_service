@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import twitter.clone.auth_service.DTO.LoginRequestPayload;
 import twitter.clone.auth_service.utils.JWTUtil;
 
@@ -14,9 +15,16 @@ public class AuthRestController {
     @Autowired
     private JWTUtil jwtUtil;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     @PostMapping("/auth/login")
     public ResponseEntity<String> login(@RequestBody LoginRequestPayload body) {
-        String token = jwtUtil.generateToken(body.getUsername());
+        String email = body.getEmail();
+        String url = "http://user_service_app/user/email/" + email;
+        String result = restTemplate.getForObject(url, String.class);
+        System.out.println(result);
+        String token = jwtUtil.generateToken(email);
 
         return new ResponseEntity<>(token, HttpStatus.OK);
     }
